@@ -63,16 +63,22 @@ def login():
     if current_user.is_authenticated:
         return redirect(url_for('home'))
     form = LoginForm()
+    
     if form.validate_on_submit():
         user = User.query.filter_by(username=form.username.data).first()
         if user is None or not user.check_password(form.password.data):
             flash('Invalid username or password')
+            logger.warning(f"Unsuccessful login attempt with username: {form.username.data}")
             return redirect(url_for('login'))
+            
         login_user(user, remember=form.remember_me.data)
+        logger.info(f"User {user.username} logged in successfully.")
+        
         next_page = request.args.get('next')
         if not next_page or url_parse(next_page).netloc != '':
             next_page = url_for('home')
         return redirect(next_page)
+        
     session["state"] = str(uuid.uuid4())
     auth_url = _build_auth_url(scopes=Config.SCOPE, state=session["state"])
     return render_template('login.html', title='Sign In', form=form, auth_url=auth_url)
@@ -81,26 +87,37 @@ def login():
 def authorized():
     if request.args.get('state') != session.get("state"):
         return redirect(url_for("home"))  # No-OP. Goes back to Index page
+        
     if "error" in request.args:  # Authentication/Authorization failure
+        logger.error(f"Microsoft authentication error: {request.args}")
         return render_template("auth_error.html", result=request.args)
+        
     if request.args.get('code'):
         cache = _load_cache()
-        result = _build_msal_app(cache=cache).acquire_token_by_authorization_code(
-     request.args['code'],
-     scopes=Config.SCOPE,
-     redirect_uri=url_for('authorized', _external=True, _scheme='https'))
+        msal_app = _build_msal_app(cache=cache)
+        
+        result = msal_app.acquire_token_by_authorization_code(
+             request.args['code'],
+             scopes=Config.SCOPE,
+             redirect_uri=url_for('authorized', _external=True)
+        )
         if "error" in result:
             #LOG Error
-            LOG.error('ERROR: Did not acquire a token for OAUTH...')
+            LOG.error(f"Token acquisition error: {result}")
             return render_template("auth_error.html", result=result)
+            
         session["user"] = result.get("id_token_claims")
-        # Note: In a real app, we'd use the 'name' property from session["user"] below
-        # Here, we'll use the admin username for anyone who is authenticated by MS
+        user_email = session["user"]["preferred_username"]
         user = User.query.filter_by(username="admin").first()
+
+        if not user:
+            user = User(username=user_email)
+            db.session.add(user)
+            db.session.commit()
         login_user(user)
         _save_cache(cache)
         # LOG
-        LOG.info('INFO: User Logged In...')
+        logger.info(f"Microsoft user {user_email} authenticated successfully.")
     return redirect(url_for('home'))
 
 @app.route('/logout')
@@ -117,13 +134,21 @@ def logout():
     return redirect(url_for('login'))
 
 def _load_cache():
-    # TODO: Load the cache from `msal`, if it exists
-    cache = None
+    """
+    Load the token cache from MSAL.
+    """
+    cache = msal.SerializableTokenCache()
+    
+    if session.get("token_cache"):
+        cache.deserialize(session["token_cache"])
     return cache
 
 def _save_cache(cache):
-    # TODO: Save the cache, if it has changed
-    pass
+    """
+    Save the token cache to the session.
+    """
+    if cache.has_state_changed:
+        session["token_cache"] = cache.serialize()
 
 def _build_msal_app(cache=None, authority=None):
     return msal.ConfidentialClientApplication(
