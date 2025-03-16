@@ -68,4 +68,4 @@ jobs:
         with:
           app-name: 'cmstan'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_BAF9AFF4F5874F3C96DE6A427F89F9F2 }}
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_932C45EBACC14E9CB473FACEA8608C07 }}
