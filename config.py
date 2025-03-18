@@ -11,7 +11,7 @@ class Config(object):
     BLOB_STORAGE_KEY = os.environ.get('BLOB_STORAGE_KEY') or 'l3dXxrnSbhUWkB4qBZy5bPjzRGeqnK0KXuJbMVTd1OP5+VfMnAZg51MKJsYDpveeMIzb4lVY/+x/+AStUpeGKA=='
     BLOB_CONTAINER = os.environ.get('BLOB_CONTAINER') or 'images'
 
-    SQL_SERVER = os.environ.get('SQL_SERVER') or 'cmstan'
+    SQL_SERVER = os.environ.get('SQL_SERVER') or 'cmsservertan.database.windows.net'
     SQL_DATABASE = os.environ.get('SQL_DATABASE') or 'cms'
     SQL_USER_NAME = os.environ.get('SQL_USER_NAME') or 'sqladmin'
     SQL_PASSWORD = os.environ.get('SQL_PASSWORD') or '!pwd1234'
