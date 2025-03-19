@@ -1,7 +1,8 @@
 """
 This script runs the FlaskWebProject application using a development server.
 
-Test Git Pull
+Test Git Pull 
+Test Git Push
 """
 
 from os import environ
