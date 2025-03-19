@@ -7,14 +7,15 @@ class Config(object):
     DEBUG = True
     SECRET_KEY = '26dd918b-e70d-4470-b328-137159187428'
 
-    BLOB_ACCOUNT = os.environ.get('BLOB_ACCOUNT') or 'cmstan'
-    BLOB_STORAGE_KEY = os.environ.get('BLOB_STORAGE_KEY') or 'l3dXxrnSbhUWkB4qBZy5bPjzRGeqnK0KXuJbMVTd1OP5+VfMnAZg51MKJsYDpveeMIzb4lVY/+x/+AStUpeGKA=='
-    BLOB_CONTAINER = os.environ.get('BLOB_CONTAINER') or 'images'
+    BLOB_ACCOUNT = 'image18'
+    BLOB_STORAGE_KEY = 'IHfXWkL5NAd4YbQvDX1g23D0bqqbI3lnw4ILQIIUug3Fmva1T1W3GMB1XlBU8cshpinRrraBtPu2+ASt2Iy8WQ=='
+    BLOB_CONTAINER = 'images'
+    BLOB_CONNECTION_STRING = 'DefaultEndpointsProtocol=https;AccountName=image18;AccountKey=IHfXWkL5NAd4YbQvDX1g23D0bqqbI3lnw4ILQIIUug3Fmva1T1W3GMB1XlBU8cshpinRrraBtPu2+ASt2Iy8WQ==;EndpointSuffix=core.windows.net'
 
-    SQL_SERVER = os.environ.get('SQL_SERVER') or 'cmsservertan.database.windows.net'
-    SQL_DATABASE = os.environ.get('SQL_DATABASE') or 'cms'
-    SQL_USER_NAME = os.environ.get('SQL_USER_NAME') or 'sqladmin'
-    SQL_PASSWORD = os.environ.get('SQL_PASSWORD') or '!pwd1234'
+    SQL_SERVER = 'cmstan.database.windows.net'
+    SQL_DATABASE = 'cms'
+    SQL_USER_NAME = 'sqladmin'
+    SQL_PASSWORD = '!pwd1234'
     # Below URI may need some adjustments for driver version, based on your OS, if running locally
     SQLALCHEMY_DATABASE_URI = 'mssql+pyodbc://' + SQL_USER_NAME + '@' + SQL_SERVER + ':' + SQL_PASSWORD + '@' + SQL_SERVER + ':1433/' + SQL_DATABASE  + '?driver=ODBC+Driver+17+for+SQL+Server'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
@@ -30,7 +31,7 @@ class Config(object):
     #     raise ValueError("Need to define CLIENT_SECRET environment variable")
 
     # AUTHORITY = "https://login.microsoftonline.com/common"  # For multi-tenant app, else put tenant name
-    AUTHORITY = "https://login.microsoftonline.com/f958e84a-92b8-439f-a62d-4f45996b6d07"
+    AUTHORITY = "https://login.microsoftonline.com/ff873fe8-6631-416d-9262-bdbd56117dae"
 
     CLIENT_ID = 'cd8e5735-7129-4065-9538-2a3499e29835'
 
