@@ -4,6 +4,9 @@ This script runs the FlaskWebProject application using a development server.
 
 from os import environ
 from FlaskWebProject import app
+import logging
+logging.basicConfig()
+logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 if __name__ == '__main__':
     # Use Azure Web App settings if available, otherwise use local dev settings
