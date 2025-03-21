@@ -18,7 +18,7 @@ app = Flask(__name__)
 app.config.from_object(Config)
 
 # Set secret key from .env
-app.config['SECRET_KEY'] = os.getenv('SECRET_KEY')
+app.config['SECRET_KEY'] = '26dd918b-e70d-4470-b328-137159187428'
 
 # Initialize extensions
 Session(app)
