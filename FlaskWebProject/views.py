@@ -106,7 +106,7 @@ def authorized():
         )
         if "error" in result:
             #LOG Error
-            LOG.error(f"Token acquisition error: {result}")
+            logger.error(f"Token acquisition error: {result}")
             return render_template("auth_error.html", result=result)
             
         session["user"] = result.get("id_token_claims")
