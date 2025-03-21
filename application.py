@@ -11,9 +11,10 @@ logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 if __name__ == '__main__':
 
     # Use Azure Web App settings if available, otherwise use local dev settings
-    HOST = environ.get('WEBSITE_HOSTNAME', 'localhost')
+    # HOST = environ.get('WEBSITE_HOSTNAME', 'localhost')
     try:
         PORT = int(environ.get('WEBSITE_PORT', '8000'))
+        app.run(host='0.0.0.0', port=port)
     except ValueError:
         PORT = 8000
         
