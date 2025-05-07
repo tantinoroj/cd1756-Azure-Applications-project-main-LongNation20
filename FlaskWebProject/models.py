@@ -12,11 +12,11 @@ logging.basicConfig()
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 # Initialize BlobServiceClient
-blob_service_client = BlobServiceClient.from_connection_string(app.config['BLOB_CONNECTION_STRING'])
-blob_container_client = blob_service_client.get_container_client(app.config['BLOB_CONTAINER'])
+# blob_service_client = BlobServiceClient.from_connection_string(app.config['BLOB_CONNECTION_STRING'])
+# blob_container_client = blob_service_client.get_container_client(app.config['BLOB_CONTAINER'])
 
-# blob_container = app.config['BLOB_CONTAINER']
-# blob_service = BlockBlobService(account_name=app.config['BLOB_ACCOUNT'], account_key=app.config['BLOB_STORAGE_KEY'])
+blob_container = app.config['BLOB_CONTAINER']
+blob_service = BlockBlobService(account_name=app.config['BLOB_ACCOUNT'], account_key=app.config['BLOB_STORAGE_KEY'])
 
 def id_generator(size=32, chars=string.ascii_uppercase + string.digits):
     return ''.join(random.choice(chars) for _ in range(size))
@@ -68,8 +68,8 @@ class Post(db.Model):
                 blob_container_client.upload_blob(name=filename, data=file, overwrite=True)
                 # blob_service.create_blob_from_stream(blob_container, filename, file)
                 if(self.image_path):
-                    blob_container_client.delete_blob(self.image_path)
-                    # blob_service.delete_blob(blob_container, self.image_path)
+                    # blob_container_client.delete_blob(self.image_path)
+                    blob_service.delete_blob(blob_container, self.image_path)
             except Exception:
                 flash(Exception)
             self.image_path =  filename
