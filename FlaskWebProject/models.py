@@ -11,10 +11,6 @@ import logging
 logging.basicConfig()
 logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
-# Initialize BlobServiceClient
-# blob_service_client = BlobServiceClient.from_connection_string(app.config['BLOB_CONNECTION_STRING'])
-# blob_container_client = blob_service_client.get_container_client(app.config['BLOB_CONTAINER'])
-
 blob_container = app.config['BLOB_CONTAINER']
 blob_service = BlockBlobService(account_name=app.config['BLOB_ACCOUNT'], account_key=app.config['BLOB_STORAGE_KEY'])
 
