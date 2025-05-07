@@ -2,7 +2,7 @@ from datetime import datetime
 from FlaskWebProject import app, db, login
 from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin
-# from azure.storage.blob import BlockBlobService   ** deprecated
+from azure.storage.blob import BlockBlobService  
 from azure.storage.blob import BlobServiceClient
 import string, random
 from werkzeug.utils import secure_filename
