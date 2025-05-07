@@ -10,15 +10,9 @@ from flask_session import Session
 from dotenv import load_dotenv
 import os
 
-# Load environment variables from .env file
-load_dotenv()
-
 # Initialize Flask app
 app = Flask(__name__)
 app.config.from_object(Config)
-
-# Set secret key from .env
-app.config['SECRET_KEY'] = '26dd918b-e70d-4470-b328-137159187428'
 
 # Initialize extensions
 Session(app)
@@ -33,17 +27,20 @@ logging.basicConfig(
 )
 app.logger.setLevel(logging.INFO)
 
-# log messages on Logging success
-app.logger.info("Flask app initialized successfully.")
-app.logger.info("Logging is set up.")
+# Create a file handler that logs messages to a file
+handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=1)
+handler.setLevel(logging.WARNING) 
+
+# Add the handler to the app's logger
+app.logger.addHandler(handler)
+streamHandler = logging.StreamHandler()
+streamHandler.setLevel(logging.INFO)
 
 # Defer importing views after app initialization to avoid circular imports
-from FlaskWebProject import views  # Import views here
+from FlaskWebProject import views , models  # Import views here
 
-# Error handling to ensure critical env veriables, are present.
-if not app.config['SECRET_KEY']:
-    raise ValueError("No SECRET_KEY set for Flask application")
+@login.user_loader
+def load_user(id):
+    return models.User.query.get(int(id))
 
-#debug logs for extention initiallization
-app.logger.debug("SQLAlchemy initialized.")
-app.logger.debug("Flask-Login initialized.")
+
