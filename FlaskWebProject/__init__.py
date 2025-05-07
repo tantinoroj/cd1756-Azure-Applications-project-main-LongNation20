@@ -27,10 +27,6 @@ logging.basicConfig(
 )
 app.logger.setLevel(logging.INFO)
 
-# Create a file handler that logs messages to a file
-handler = RotatingFileHandler('app.log', maxBytes=10000, backupCount=1)
-handler.setLevel(logging.WARNING) 
-
 # Add the handler to the app's logger
 app.logger.addHandler(handler)
 streamHandler = logging.StreamHandler()
