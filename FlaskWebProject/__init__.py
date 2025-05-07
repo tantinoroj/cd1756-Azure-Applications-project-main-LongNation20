@@ -27,16 +27,9 @@ logging.basicConfig(
 )
 app.logger.setLevel(logging.INFO)
 
-# Add the handler to the app's logger
-app.logger.addHandler(handler)
-streamHandler = logging.StreamHandler()
-streamHandler.setLevel(logging.INFO)
-
 # Defer importing views after app initialization to avoid circular imports
 from FlaskWebProject import views , models  # Import views here
 
 @login.user_loader
 def load_user(id):
     return models.User.query.get(int(id))
-
-
