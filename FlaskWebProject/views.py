@@ -89,6 +89,7 @@ def login():
 @app.route(Config.REDIRECT_PATH)  # Its absolute URL must match your app's redirect_uri set in AAD
 def authorized():
     if request.args.get('state') != session.get("state"):
+        logger.warning("State mismatch in authorized callback")
         return redirect(url_for("home"))  # No-OP. Goes back to Index page
         
     if "error" in request.args:  # Authentication/Authorization failure
@@ -96,70 +97,61 @@ def authorized():
         return render_template("auth_error.html", result=request.args)
         
     if request.args.get('code'):
-        cache = _load_cache()
-        msal_app = _build_msal_app(cache=cache)
-        
-        result = msal_app.acquire_token_by_authorization_code(
-             request.args['code'],
-             scopes=Config.SCOPE,
-             redirect_uri=url_for('authorized', _external=True)
-        )
+        cache = _load_cache()      
+        result = _build_msal_app(cache=cache).acquire_token_by_authorization_code(
+            request.args['code'],
+            scopes=Config.SCOPE,
+            redirect_uri=url_for('authorized', _external=True, _scheme='https'))
         if "error" in result:
-            #LOG Error
-            logger.error(f"Token acquisition error: {result}")
+            logger.error(f"Token acquisition error: {result.get('error')}")
             return render_template("auth_error.html", result=result)
-            
         session["user"] = result.get("id_token_claims")
-        user_email = session["user"]["preferred_username"]
-        user = User.query.filter_by(username="admin").first()
-
+        user = User.query.filter_by(username=session["user"].get("preferred_username")).first()
         if not user:
-            user = User(username=user_email)
+            logger.info(f"Creating new user account for: {session['user'].get('preferred_username')}")
+            user = User(username=session["user"].get("preferred_username"))
+            user.set_password(str(uuid.uuid4()))
             db.session.add(user)
             db.session.commit()
         login_user(user)
+        logger.info(f"Successful Microsoft login for user: {user.username}")
         _save_cache(cache)
-        # LOG
-        logger.info(f"Microsoft user {user_email} authenticated successfully.")
     return redirect(url_for('home'))
 
 @app.route('/logout')
 def logout():
-    logout_user()
-    if session.get("user"): # Used MS Login
-        # Wipe out user and its token cache from session
-        session.clear()
-        # Also logout from your tenant's web session
-        return redirect(
-            Config.AUTHORITY + "/oauth2/v2.0/logout" +
-            "?post_logout_redirect_uri=" + url_for("login", _external=True))
-
+     if current_user.is_authenticated:
+        username = current_user.username
+        logger.info(f"User {username} logging out")
+        logout_user()
+        if session.get("user"): # Used MS Login
+            # Wipe out user and its token cache from session
+            session.clear()
+            # Also logout from your tenant's web session
+            return redirect(
+                Config.AUTHORITY + "/oauth2/v2.0/logout" +
+                "?post_logout_redirect_uri=" + url_for("login", _external=True))
     return redirect(url_for('login'))
 
 def _load_cache():
-    """
-    Load the token cache from MSAL.
-    """
     cache = msal.SerializableTokenCache()
-    
     if session.get("token_cache"):
         cache.deserialize(session["token_cache"])
     return cache
 
 def _save_cache(cache):
-    """
-    Save the token cache to the session.
-    """
     if cache.has_state_changed:
         session["token_cache"] = cache.serialize()
 
 def _build_msal_app(cache=None, authority=None):
     return msal.ConfidentialClientApplication(
-     Config.CLIENT_ID, authority=authority or Config.AUTHORITY,
-     client_credential=Config.CLIENT_SECRET, token_cache=cache)
+        Config.CLIENT_ID,
+        authority=authority or Config.AUTHORITY,
+        client_credential=Config.CLIENT_SECRET,
+        token_cache=cache)
 
 def _build_auth_url(authority=None, scopes=None, state=None):
     return _build_msal_app(authority=authority).get_authorization_request_url(
-    scopes or [],
-    state=state or str(uuid.uuid4()),
-    redirect_uri=url_for('authorized', _external=True, _scheme='https'))
+        scopes or [],
+        state=state or str(uuid.uuid4()),
+        redirect_uri=url_for('authorized', _external=True, _scheme='https'))
